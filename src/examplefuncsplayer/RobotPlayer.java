@@ -72,10 +72,10 @@ public strictfp class RobotPlayer {
                     case ARCHON:     runArchon(rc);  break;
                     case MINER:      runMiner(rc);   break;
                     case SOLDIER:    runSoldier(rc); break;
-                    case LABORATORY: // Examplefuncsplayer doesn't use any of these robot types below.
-                    case WATCHTOWER: // You might want to give them a try!
-                    case BUILDER:
-                    case SAGE:       break;
+                    case LABORATORY: runLaboratory(rc); break;
+                    case WATCHTOWER: runWatchtower(rc); break;
+                    case BUILDER:    runBuilder(rc); break;
+                    case SAGE:       runSage(rc); break;
                 }
             } catch (GameActionException e) {
                 // Oh no! It looks like we did something illegal in the Battlecode world. You should
@@ -106,6 +106,7 @@ public strictfp class RobotPlayer {
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
      */
     static void runArchon(RobotController rc) throws GameActionException {
+        // TODO(*): Refactor to include other RobotType's
         // Pick a direction to build in.
         Direction dir = directions[rng.nextInt(directions.length)];
         if (rng.nextBoolean()) {
@@ -175,4 +176,68 @@ public strictfp class RobotPlayer {
             System.out.println("I moved!");
         }
     }
+
+    /**
+     * Run a single turn for a Laboratory.
+     * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
+     */
+    static void runLaboratory(RobotController rc) throws GameActionException {
+        // TODO(*): Complete this method
+        // Check if laboratory can transmute lead to gold.
+        if (rc.canTransmute()) {
+            rc.transmute();
+        }
+    }
+
+    /**
+     * Run a single turn for a Watchtower.
+     * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
+     */
+    static void runWatchtower(RobotController rc) throws GameActionException {
+        // Attacks enemies that too close
+        int radius = rc.getType().actionRadiusSquared;
+        Team opponent = rc.getTeam().opponent();
+        RobotInfo[] enemies = rc.senseNearbyRobots(radius, opponent);
+        if (enemies.length > 0) {
+            MapLocation toAttack = enemies[0].location;
+            if (rc.canAttack(toAttack)) {
+                rc.attack(toAttack);
+            }
+        }
+    }
+
+    /**
+     * Run a single turn for a Builder.
+     * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
+     */
+    static void runBuilder(RobotController rc) throws GameActionException {
+        Direction dir = directions[rng.nextInt(directions.length)];
+        // TODO(*): Refactor to include other RobotType's
+        if (rc.getTeamGoldAmount(rc.getTeam()) >= 50) {
+            if (rc.canBuildRobot(RobotType.SAGE, dir)) {
+                rc.buildRobot(RobotType.SAGE, dir);
+            }
+        }
+        if (rng.nextBoolean()) {
+            rc.setIndicatorString("Trying to build a laboratory");
+            if (rc.canBuildRobot(RobotType.LABORATORY, dir)) {
+                rc.buildRobot(RobotType.LABORATORY, dir);
+            }
+        } else {
+            // Let's try to build a watchtower.
+            rc.setIndicatorString("Trying to build a watchtower");
+            if (rc.canBuildRobot(RobotType.WATCHTOWER, dir)) {
+                rc.buildRobot(RobotType.WATCHTOWER, dir);
+            }
+        }
+    }
+
+    /**
+     * Run a single turn for a Sage.
+     * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
+     */
+    static void runSage(RobotController rc) throws GameActionException {
+        // TODO(*): Finish method
+    }
+
 }
